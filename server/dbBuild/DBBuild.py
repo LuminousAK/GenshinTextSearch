@@ -3,6 +3,7 @@ import re
 import json
 from DBConfig import conn, DATA_PATH
 import voiceItemImport
+import readableImport
 from tqdm import tqdm
 
 
@@ -108,24 +109,22 @@ def importQuest(fileName: str):
     sql2 = 'insert into questTalk(questId, talkId) values (?,?)'
 
     if 'id' in obj:
-        if 'EKEKACCODOE' in obj:
-            keyQuestId = 'id'
-            keyTitleTextMapHash = 'descTextMapHash'  # That's right, it seems that dim messed up the key of title in 5.0
-            keyChapterId = 'chapterId'
-            keyTalks = 'talks'
-            keyTalkId = 'id'
-        else:
-            keyQuestId = 'id'
-            keyTitleTextMapHash = 'titleTextMapHash'
-            keyChapterId = 'chapterId'
-            keyTalks = 'talks'
-            keyTalkId = 'id'
-    else:
-        keyQuestId = 'CCFPGAKINNB'
+        keyQuestId = 'id'
+        keyTitleTextMapHash = 'titleTextMapHash'
+        keyChapterId = 'chapterId'
+        keyTalks = 'talks'
+        keyTalkId = 'id'
+    elif 'ILHDNJDDEOP' in obj:
+        # keyQuestId = 'CCFPGAKINNB'
+        keyQuestId = 'ILHDNJDDEOP'
         keyTitleTextMapHash = 'HLAINHJACPJ'
         keyChapterId = 'FLCLAPBOOHF'
         keyTalks = 'PCNNNPLAEAI'
-        keyTalkId = 'CCFPGAKINNB'
+        # keyTalkId = 'CCFPGAKINNB'
+        keyTalkId = 'ILHDNJDDEOP'
+    else:
+        print("Skipping " + fileName)
+        return
 
     questId = obj[keyQuestId]
 
@@ -217,10 +216,11 @@ def main():
     print("Importing voices...")
     voiceItemImport.loadAvatars()
     voiceItemImport.importAllVoiceItems()
+    print("Importing readable...")
+    readableImport.importReadable()
     print("Done!")
 
 
 if __name__ == "__main__":
     main()
     pass
-

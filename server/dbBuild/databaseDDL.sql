@@ -159,7 +159,20 @@ create table manualTextMap
 create unique index manualTextMap_textMapId_uindex
     on manualTextMap (textMapId);
 
+create table readable
+(
+    id       integer
+        constraint readable_pk
+            primary key autoincrement,
+    fileName text,
+    lang     text,
+    content  text,
+    constraint readable_pk_2
+        unique (fileName, lang)
+);
 
+create index readable_fileName_index
+    on readable (fileName);
 
 
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (1, 'TextMapCHS.json', '简体中文', 0);
@@ -177,4 +190,3 @@ INSERT INTO langCode (id, codeName, displayName, imported) VALUES (12, 'TextMapR
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (13, 'TextMapTH.json', 'ภาษาไทย', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (14, 'TextMapTR.json', 'Türkçe', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (15, 'TextMapVI.json', 'Tiếng Việt', 0);
-

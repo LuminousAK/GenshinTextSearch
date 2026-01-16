@@ -1,4 +1,3 @@
-import sqlite3
 import os
 import sqlite3
 
@@ -7,6 +6,9 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
 
 # Dim的解包数据的TextMap文件夹位置，请在其中放置需要导入的语言json，并保持其TextMapXX.json的文件名不变
 LANG_PATH = os.path.join(os.path.dirname(__file__), "langs")
+
+# Dim的解包数据的Readable文件夹位置
+READABLE_PATH = os.path.join(os.path.dirname(__file__), "Readable")
 
 # 导入/生成的数据库的位置，默认为../data.db，如果要新建从头建立数据库建议选一个其他位置
 DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")

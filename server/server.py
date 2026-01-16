@@ -30,7 +30,7 @@ def getImportedVoiceLanguages():
 
 @app.route("/api/keywordQuery", methods=['POST'])
 def keywordQuery():
-    langCode = request.json['langCode']
+    langCode = int(request.json['langCode'])
     keyword: str = request.json['keyword']
 
     if keyword.strip() == "":

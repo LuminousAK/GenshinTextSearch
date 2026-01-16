@@ -1,4 +1,5 @@
 import io
+import zlib
 
 import databaseHelper
 import languagePackReader
@@ -72,6 +73,40 @@ def getTranslateObj(keyword: str, langCode: int):
     for content in contents:
         obj = queryTextHashInfo(content[0], langs, sourceLangCode)
         ans.append(obj)
+
+    # Search readable
+    langMap = databaseHelper.getLangCodeMap()
+    if langCode in langMap:
+        langStr = langMap[langCode]
+        readableContents = databaseHelper.selectReadableFromKeyword(keyword, langStr)
+        
+        targetLangStrs = []
+        for l in langs:
+            if l in langMap:
+                targetLangStrs.append(langMap[l])
+        
+        # Reverse map for result construction
+        strToLangId = {v: k for k, v in langMap.items()}
+
+        for fileName, content in readableContents:
+            # Generate a stable hash for the filename
+            fileHash = zlib.crc32(fileName.encode('utf-8'))
+            
+            obj = {
+                'translates': {},
+                'voicePaths': [],
+                'hash': fileHash,
+                'isTalk': False,
+                'origin': f"书籍: {fileName}"
+            }
+            
+            # Get translations
+            translations = databaseHelper.selectReadableFromFileName(fileName, targetLangStrs)
+            for transContent, transLangStr in translations:
+                if transLangStr in strToLangId:
+                    obj['translates'][strToLangId[transLangStr]] = transContent
+            
+            ans.append(obj)
 
     return ans
 

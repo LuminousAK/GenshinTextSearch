@@ -1,9 +1,9 @@
 import sqlite3
 from contextlib import closing
-import os
+import re
 
 # 没人会给一个词典搞高并发吧？
-conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "data.db"), check_same_thread=False)
+conn = sqlite3.connect(r".\data.db", check_same_thread=False)
 
 
 def selectTextMapFromKeyword(keyWord: str, langCode: int):
@@ -270,3 +270,35 @@ def getTalkContent(talkId: int, coopQuestId: 'int | None') -> 'list[tuple[int, s
             return ans
         else:
             return None
+
+def getLangCodeMap():
+    # Returns {id: 'CHS', ...}
+    with closing(conn.cursor()) as cursor:
+        sql = "select id, codeName from langCode"
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        mapping = {}
+        for row in rows:
+            # codeName is like 'TextMapCHS.json'
+            match = re.match(r'TextMap(.+)\.json', row[1])
+            if match:
+                mapping[row[0]] = match.group(1)
+        return mapping
+
+def selectReadableFromKeyword(keyword: str, langStr: str):
+    # Returns [(fileName, content)]
+    with closing(conn.cursor()) as cursor:
+        sql = "select fileName, content from readable where lang=? and content like ? limit 200"
+        cursor.execute(sql, (langStr, f'%{keyword}%'))
+        return cursor.fetchall()
+
+def selectReadableFromFileName(fileName: str, langs: list[str]):
+    # Returns [(content, langStr)]
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"select content, lang from readable where fileName=? and lang in ({placeholders})"
+        params = [fileName] + langs
+        cursor.execute(sql, params)
+        return cursor.fetchall()
