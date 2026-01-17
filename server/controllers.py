@@ -88,20 +88,34 @@ def getTranslateObj(keyword: str, langCode: int):
         # Reverse map for result construction
         strToLangId = {v: k for k, v in langMap.items()}
 
-        for fileName, content in readableContents:
+        for fileName, content, titleTextMapHash, readableId in readableContents:
             # Generate a stable hash for the filename
             fileHash = zlib.crc32(fileName.encode('utf-8'))
             
+            origin = f"阅读物: {fileName}"
+            if titleTextMapHash:
+                title = databaseHelper.getTextMapContent(titleTextMapHash, sourceLangCode)
+                if title:
+                    origin = f"阅读物: {fileName} ({title})"
+
             obj = {
                 'translates': {},
                 'voicePaths': [],
                 'hash': fileHash,
                 'isTalk': False,
-                'origin': f"书籍: {fileName}"
+                'origin': origin
             }
             
             # Get translations
-            translations = databaseHelper.selectReadableFromFileName(fileName, targetLangStrs)
+            translations = []
+            if readableId:
+                # Use the readableId (Localization ID) to find translations directly
+                translations = databaseHelper.selectReadableFromReadableId(readableId, targetLangStrs)
+            
+            # Fallback if readableId is missing or didn't return results (e.g. old DB or manual file)
+            if not translations:
+                translations = databaseHelper.selectReadableFromFileName(fileName, targetLangStrs)
+
             for transContent, transLangStr in translations:
                 if transLangStr in strToLangId:
                     obj['translates'][strToLangId[transLangStr]] = transContent

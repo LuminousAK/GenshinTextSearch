@@ -286,9 +286,9 @@ def getLangCodeMap():
         return mapping
 
 def selectReadableFromKeyword(keyword: str, langStr: str):
-    # Returns [(fileName, content)]
+    # Returns [(fileName, content, titleTextMapHash, readableId)]
     with closing(conn.cursor()) as cursor:
-        sql = "select fileName, content from readable where lang=? and content like ? limit 200"
+        sql = "select fileName, content, titleTextMapHash, readableId from readable where lang=? and content like ? limit 200"
         cursor.execute(sql, (langStr, f'%{keyword}%'))
         return cursor.fetchall()
 
@@ -302,3 +302,23 @@ def selectReadableFromFileName(fileName: str, langs: list[str]):
         params = [fileName] + langs
         cursor.execute(sql, params)
         return cursor.fetchall()
+
+def selectReadableFromReadableId(readableId: int, langs: list[str]):
+    # Returns [(content, langStr)]
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"select content, lang from readable where readableId=? and lang in ({placeholders})"
+        params = [readableId] + langs
+        cursor.execute(sql, params)
+        return cursor.fetchall()
+
+def getTextMapContent(textHash: int, langCode: int):
+    with closing(conn.cursor()) as cursor:
+        sql = "select content from textMap where hash=? and lang=?"
+        cursor.execute(sql, (textHash, langCode))
+        ans = cursor.fetchall()
+        if len(ans) > 0:
+            return ans[0][0]
+        return None

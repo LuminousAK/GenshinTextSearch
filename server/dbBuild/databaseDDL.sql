@@ -167,12 +167,17 @@ create table readable
     fileName text,
     lang     text,
     content  text,
+    titleTextMapHash integer,
+    readableId integer,
     constraint readable_pk_2
         unique (fileName, lang)
 );
 
 create index readable_fileName_index
     on readable (fileName);
+
+create index readable_readableId_index
+    on readable (readableId);
 
 
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (1, 'TextMapCHS.json', '简体中文', 0);
