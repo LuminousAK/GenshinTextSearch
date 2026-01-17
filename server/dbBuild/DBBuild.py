@@ -19,14 +19,20 @@ def importTalk(fileName: str):
         talkRoleTypeKey = 'type'
         talkRoleIdKey = '_id'
         talkContentTextMapHashKey = 'talkContentTextMapHash'
-    elif 'FEOACBMDCKJ' in obj:
-        talkIdKey = 'FEOACBMDCKJ'
-        dialogueListKey = 'AAOAAFLLOJI'
-        dialogueIdKey = 'CCFPGAKINNB'
-        talkRoleKey = 'HJLEMJIGNFE'
+    # elif 'FEOACBMDCKJ' in obj:
+    elif 'ADHLLDAPKCM' in obj:
+        # talkIdKey = 'FEOACBMDCKJ'
+        talkIdKey = 'ADHLLDAPKCM'
+        # dialogueListKey = 'AAOAAFLLOJI'
+        dialogueListKey = 'MOEOFGCKILF'
+        # dialogueIdKey = 'CCFPGAKINNB'
+        dialogueIdKey = 'ILHDNJDDEOP'
+        # talkRoleKey = 'HJLEMJIGNFE'
+        talkRoleKey = 'LCECPDILLEE'
         talkRoleTypeKey = '_type'
         talkRoleIdKey = '_id'
-        talkContentTextMapHashKey = 'BDOKCLNNDGN'
+        # talkContentTextMapHashKey = 'BDOKCLNNDGN'
+        talkContentTextMapHashKey = 'GABLFFECBDO'
     else:
         print("Skipping " + fileName)
         return
@@ -117,9 +123,12 @@ def importQuest(fileName: str):
     elif 'ILHDNJDDEOP' in obj:
         # keyQuestId = 'CCFPGAKINNB'
         keyQuestId = 'ILHDNJDDEOP'
-        keyTitleTextMapHash = 'HLAINHJACPJ'
-        keyChapterId = 'FLCLAPBOOHF'
-        keyTalks = 'PCNNNPLAEAI'
+        # keyTitleTextMapHash = 'HLAINHJACPJ'
+        keyTitleTextMapHash = 'MMOEEOFGHHG'
+        # keyChapterId = 'FLCLAPBOOHF'
+        keyChapterId = 'IBNCKLKHAKG'
+        # keyTalks = 'PCNNNPLAEAI'
+        keyTalks = 'IBEGAHMEABP'
         # keyTalkId = 'CCFPGAKINNB'
         keyTalkId = 'ILHDNJDDEOP'
     else:
