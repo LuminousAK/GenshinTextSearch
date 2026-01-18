@@ -179,6 +179,24 @@ create index readable_fileName_index
 create index readable_readableId_index
     on readable (readableId);
 
+create table subtitle
+(
+    id        integer
+        constraint subtitle_pk
+            primary key autoincrement,
+    fileName  text,
+    lang      integer,
+    startTime real,
+    endTime   real,
+    content   text,
+    subtitleId integer
+);
+
+create index subtitle_fileName_index
+    on subtitle (fileName);
+
+create index subtitle_subtitleId_index
+    on subtitle (subtitleId);
 
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (1, 'TextMapCHS.json', '简体中文', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (2, 'TextMapCHT.json', '繁體中文', 0);

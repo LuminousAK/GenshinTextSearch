@@ -322,3 +322,68 @@ def getTextMapContent(textHash: int, langCode: int):
         if len(ans) > 0:
             return ans[0][0]
         return None
+
+def selectSubtitleFromKeyword(keyword: str, langCode: int):
+    # Returns [(fileName, content, startTime, endTime, subtitleId)]
+    with closing(conn.cursor()) as cursor:
+        sql = "select fileName, content, startTime, endTime, subtitleId from subtitle where lang=? and content like ? limit 200"
+        cursor.execute(sql, (langCode, f'%{keyword}%'))
+        return cursor.fetchall()
+
+def selectSubtitleTranslations(fileName: str, startTime: float, langs: list[int]):
+    # Returns [(content, langCode)]
+    # Matches subtitles in other languages with similar start time (+- 0.5s)
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"""
+            select content, lang 
+            from subtitle 
+            where fileName=? 
+            and lang in ({placeholders})
+            and abs(startTime - ?) < 0.5
+        """
+        params = [fileName] + langs + [startTime]
+        cursor.execute(sql, params)
+        return cursor.fetchall()
+
+def selectSubtitleTranslationsBySubtitleId(subtitleId: int, startTime: float, langs: list[int]):
+    # Returns [(content, langCode)]
+    # Matches subtitles in other languages with similar start time (+- 0.5s) using subtitleId
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"""
+            select content, lang 
+            from subtitle 
+            where subtitleId=? 
+            and lang in ({placeholders})
+            and abs(startTime - ?) < 0.5
+        """
+        params = [subtitleId] + langs + [startTime]
+        cursor.execute(sql, params)
+        return cursor.fetchall()
+
+def selectSubtitleContext(fileName: str, langs: list[int]):
+    # Returns [(content, lang, startTime, endTime)]
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"select content, lang, startTime, endTime from subtitle where fileName=? and lang in ({placeholders}) order by startTime"
+        params = [fileName] + langs
+        cursor.execute(sql, params)
+        return cursor.fetchall()
+
+def selectSubtitleContextBySubtitleId(subtitleId: int, langs: list[int]):
+    # Returns [(content, lang, startTime, endTime)]
+    with closing(conn.cursor()) as cursor:
+        if not langs:
+            return []
+        placeholders = ','.join(['?'] * len(langs))
+        sql = f"select content, lang, startTime, endTime from subtitle where subtitleId=? and lang in ({placeholders}) order by startTime"
+        params = [subtitleId] + langs
+        cursor.execute(sql, params)
+        return cursor.fetchall()

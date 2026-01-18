@@ -15,7 +15,7 @@ import {useRouter} from "vue-router";
  *             }
  *         },
  */
-const props = defineProps(['translateObj', 'keyword'])
+const props = defineProps(['translateObj', 'keyword', 'searchLang'])
 const emit = defineEmits(['onVoicePlay'])
 const router = useRouter()
 
@@ -25,8 +25,21 @@ const onVoicePlay = (voiceUrl) => {
 }
 
 const gotoTalk = () => {
+    if (props.translateObj.isSubtitle) {
+        let query = {
+            fileName: props.translateObj.fileName,
+            keyword: props.keyword,
+            isSubtitle: 1,
+            searchLang: props.searchLang
+        }
+        if (props.translateObj.subtitleId) {
+            query.subtitleId = props.translateObj.subtitleId
+        }
+        router.push({path: '/talk', query: query})
+        return
+    }
     if(!props.translateObj.isTalk) return
-    router.push(`/talk?textHash=${props.translateObj.hash}&keyword=${props.keyword}`)
+    router.push(`/talk?textHash=${props.translateObj.hash}&keyword=${props.keyword}&searchLang=${props.searchLang}`)
 }
 
 </script>
@@ -48,9 +61,9 @@ const gotoTalk = () => {
             <StylizedText :text="translate" :keyword="$props.keyword"/>
         </div>
         <p class="info">
-            <span class="origin" :class="{talkOrigin: props.translateObj.isTalk}" @click="gotoTalk">
+            <span class="origin" :class="{talkOrigin: props.translateObj.isTalk || props.translateObj.isSubtitle}" @click="gotoTalk">
                 来源：{{props.translateObj.origin}}
-                <span class="gotoIcon" v-if="props.translateObj.isTalk">&gt</span>
+                <span class="gotoIcon" v-if="props.translateObj.isTalk || props.translateObj.isSubtitle">&gt</span>
             </span>
         </p>
     </div>

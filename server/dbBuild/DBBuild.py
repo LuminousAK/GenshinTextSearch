@@ -4,7 +4,15 @@ import json
 from DBConfig import conn, DATA_PATH
 import voiceItemImport
 import readableImport
+import subtitleImport
 from tqdm import tqdm
+
+# 语言文件夹名到数据库 langCode ID 的映射
+LANG_MAP = {
+    'CHS': 1, 'CHT': 2, 'DE': 3, 'EN': 4, 'ES': 5,
+    'FR': 6, 'ID': 7, 'IT': 8, 'JP': 9, 'KR': 10,
+    'PT': 11, 'RU': 12, 'TH': 13, 'TR': 14, 'VI': 15
+}
 
 
 def importTalk(fileName: str):
@@ -206,7 +214,6 @@ def importManualTextMap():
     cursor.close()
     conn.commit()
 
-
 def main():
     print("Importing talks...")
     importAllTalkItems()
@@ -227,6 +234,8 @@ def main():
     voiceItemImport.importAllVoiceItems()
     print("Importing readable...")
     readableImport.importReadable()
+    print("Importing subtitles...")
+    subtitleImport.importSubtitles()
     print("Done!")
 
 

@@ -68,9 +68,12 @@ def getVoiceOver():
 @app.route("/api/getTalkFromHash", methods=['POST'])
 def getTalkFromHash():
     textHash: int = request.json['textHash']
+    searchLang = request.json.get('searchLang')
+    if searchLang:
+        searchLang = int(searchLang)
     try:
         start = time.time()
-        contents = controllers.getTalkFromHash(textHash)
+        contents = controllers.getTalkFromHash(textHash, searchLang)
         end = time.time()
     except str as e:
         return buildResponse(code=114, msg=e)
@@ -80,6 +83,22 @@ def getTalkFromHash():
         'time': (end - start)*1000
     })
 
+@app.route("/api/getSubtitleContext", methods=['POST'])
+def getSubtitleContext():
+    fileName = request.json.get('fileName')
+    subtitleId = request.json.get('subtitleId')
+    searchLang = request.json.get('searchLang')
+    if searchLang:
+        searchLang = int(searchLang)
+    
+    start = time.time()
+    contents = controllers.getSubtitleContext(fileName, subtitleId, searchLang)
+    end = time.time()
+
+    return buildResponse({
+        'contents': contents,
+        'time': (end - start)*1000
+    })
 
 @app.route("/api/saveSettings", methods=['POST'])
 def saveSettings():

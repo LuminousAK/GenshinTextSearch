@@ -30,7 +30,7 @@
 
 
         <div>
-            <TranslateDisplay v-for="translate in queryResult" :translate-obj="translate" class="translate" @onVoicePlay="onVoicePlay" :keyword="keywordLast" />
+            <TranslateDisplay v-for="translate in queryResult" :translate-obj="translate" class="translate" @onVoicePlay="onVoicePlay" :keyword="keywordLast" :search-lang="searchLangLast" />
         </div>
     </div>
 
@@ -77,6 +77,7 @@ const queryResult = ref([])
 const selectedInputLanguage = ref(global.config.defaultSearchLanguage + '')
 const keyword = ref("")
 const keywordLast = ref("")
+const searchLangLast = ref(0)
 const supportedInputLanguage = ref({})
 const searchSummary = ref("")
 
@@ -157,6 +158,7 @@ const onQueryButtonClicked = async () =>{
 
     queryResult.value.push(...noVoiceEntries)
     keywordLast.value = keyword.value
+    searchLangLast.value = parseInt(selectedInputLanguage.value)
 
     if(mergedCount > 0){
         searchSummaryTmp += `，已合并 ${mergedCount} 条重复结果。`

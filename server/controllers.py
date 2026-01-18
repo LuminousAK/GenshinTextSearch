@@ -124,17 +124,52 @@ def getTranslateObj(keyword: str, langCode: int):
             
             ans.append(obj)
 
+    # Search subtitles
+    subtitleContents = databaseHelper.selectSubtitleFromKeyword(keyword, langCode)
+    for fileName, content, startTime, endTime, subtitleId in subtitleContents:
+        # Generate a stable hash for the subtitle line
+        # Use fileName + startTime to be unique
+        fileHash = zlib.crc32(f"{fileName}_{startTime}".encode('utf-8'))
+        
+        origin = f"字幕: {fileName}"
+        
+        obj = {
+            'translates': {},
+            'voicePaths': [],
+            'hash': fileHash,
+            'isTalk': False,
+            'origin': origin,
+            'isSubtitle': True,
+            'fileName': fileName,
+            'subtitleId': subtitleId
+        }
+        
+        # Get translations
+        translations = []
+        if subtitleId:
+            translations = databaseHelper.selectSubtitleTranslationsBySubtitleId(subtitleId, startTime, langs)
+        
+        if not translations:
+            translations = databaseHelper.selectSubtitleTranslations(fileName, startTime, langs)
+        
+        for transContent, transLangCode in translations:
+            obj['translates'][transLangCode] = transContent
+            
+        ans.append(obj)
+
     return ans
 
 
 # 根据hash值查询整个对话的内容
-def getTalkFromHash(textHash: int):
+def getTalkFromHash(textHash: int, searchLang: int = None):
     # 先查到文本所属的talk，然后查询对话所属的任务的标题，然后查询对话所有的内容，对于每一句话，查询多语言翻译、说话者
     talkInfo = databaseHelper.getTalkInfo(textHash)
     if talkInfo is None:
         raise "内容不属于任何对话！"
 
-    langs = config.getResultLanguages()
+    langs = config.getResultLanguages().copy()
+    if searchLang and searchLang not in langs:
+        langs.append(searchLang)
     sourceLangCode = config.getSourceLanguage()
 
     talkId, talkerType, talkerId, coopQuestId = talkInfo
@@ -160,6 +195,54 @@ def getTalkFromHash(textHash: int):
     }
 
     return ans
+
+def getSubtitleContext(fileName: str, subtitleId: int = None, searchLang: int = None):
+    langs = config.getResultLanguages().copy()
+    if searchLang and searchLang not in langs:
+        langs.append(searchLang)
+    
+    # Fetch all lines
+    if subtitleId:
+        lines = databaseHelper.selectSubtitleContextBySubtitleId(subtitleId, langs)
+    else:
+        lines = databaseHelper.selectSubtitleContext(fileName, langs)
+        
+    # Group by startTime (cluster within <threshold> seconds)
+    clusters = []
+    
+    # Sort lines by startTime
+    lines.sort(key=lambda x: x[2])
+
+    threshold = 0.5
+    
+    for content, lang, startTime, endTime in lines:
+        # Check last cluster
+        if clusters and abs(clusters[-1]['time'] - startTime) < threshold and lang not in clusters[-1]['translates']:
+            clusters[-1]['translates'][lang] = content
+        else:
+            clusters.append({
+                'time': startTime,
+                'translates': {lang: content},
+                'voicePaths': [],
+                'talker': '', # Subtitles usually don't have talker info in the text
+                'dialogueId': int(startTime * 1000) # Use ms as ID
+            })
+            
+    # Format for frontend
+    dialogues = []
+    for cluster in clusters:
+        dialogues.append({
+            'talker': '',
+            'translates': cluster['translates'],
+            'voicePaths': [],
+            'dialogueId': cluster['dialogueId']
+        })
+        
+    return {
+        "talkQuestName": f"字幕: {fileName}",
+        "talkId": 0,
+        "dialogues": dialogues
+    }
 
 
 def getVoiceBinStream(voicePath, langCode):
